@@ -3,36 +3,108 @@
 
 <div id="particles-js" class="w-full h-full pointer-events-none"></div>
 
-<!-- Load particles.js from CDN and initialize -->
-<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js" is:inline></script>
 <script is:inline>
-  (function initParticles() {
-    function start() {
-      if (typeof window === 'undefined' || typeof particlesJS === 'undefined') return;
-      particlesJS('particles-js', {
-        particles: {
-          number: { value: 60, density: { enable: true, value_area: 800 } },
-          color: { value: ['#FF6B35', '#00A8E8', '#7E57C2'] },
-          shape: { type: 'circle' },
-          opacity: { value: 0.5, random: false },
-          size: { value: 3, random: true },
-          line_linked: { enable: true, distance: 150, color: '#9CA3AF', opacity: 0.35, width: 1 },
-          move: { enable: true, speed: 1.2, direction: 'none', random: false, straight: false, out_mode: 'out' }
-        },
-        interactivity: {
-          detect_on: 'canvas',
-          events: { onhover: { enable: false }, onclick: { enable: false }, resize: true },
-          modes: {}
-        },
-        retina_detect: true
+  (function () {
+    const containerId = 'particles-js';
+
+    function ensureLibLoaded() {
+      if (typeof window === 'undefined') return Promise.resolve();
+      if (window.particlesJS) return Promise.resolve();
+      if (window.__particlesLoad) return window.__particlesLoad;
+
+      window.__particlesLoad = new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = '/vendor/particles.min.js';
+        s.async = true;
+        s.onload = () => resolve();
+        s.onerror = reject;
+        document.head.appendChild(s);
       });
+      return window.__particlesLoad;
     }
 
-    if (document.readyState === 'complete' || document.readyState === 'interactive') {
-      start();
-    } else {
-      document.addEventListener('DOMContentLoaded', start, { once: true });
+    function destroyInstance() {
+      try {
+        if (!window.pJSDom || !window.pJSDom.length) return;
+        for (let i = window.pJSDom.length - 1; i >= 0; i--) {
+          const inst = window.pJSDom[i];
+          const canvas = inst?.pJS?.canvas?.el;
+          const parentId = canvas?.parentElement?.id;
+          if (parentId === containerId) {
+            inst.pJS.fn.vendors.destroypJS();
+            window.pJSDom.splice(i, 1);
+          }
+        }
+      } catch (e) {
+        // noop
+      }
     }
+
+    function initParticles() {
+      const root = document.getElementById(containerId);
+      if (!root || root.dataset.inited === 'true') return;
+
+      ensureLibLoaded()
+        .then(() => {
+          if (typeof particlesJS === 'undefined') return;
+          destroyInstance();
+
+          particlesJS(containerId, {
+            particles: {
+              number: { value: 60, density: { enable: true, value_area: 800 } },
+              color: { value: ['#FF6B35', '#00A8E8', '#7E57C2'] },
+              shape: { type: 'circle' },
+              opacity: { value: 0.5, random: false },
+              size: { value: 3, random: true },
+              line_linked: { enable: true, distance: 150, color: '#9CA3AF', opacity: 0.35, width: 1 },
+              move: { enable: true, speed: 1.2, direction: 'none', random: false, straight: false, out_mode: 'out' }
+            },
+            interactivity: {
+              detect_on: 'canvas',
+              events: { onhover: { enable: false }, onclick: { enable: false }, resize: true },
+              modes: {}
+            },
+            retina_detect: true
+          });
+
+          root.dataset.inited = 'true';
+        })
+        .catch(() => {});
+    }
+
+    function cleanup() {
+      const root = document.getElementById(containerId);
+      if (!root) return;
+      destroyInstance();
+      root.removeAttribute('data-inited');
+      // remove any leftover canvas
+      const canvas = root.querySelector('canvas');
+      if (canvas) canvas.remove();
+    }
+
+    // Initial attempts
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      initParticles();
+    } else {
+      document.addEventListener('DOMContentLoaded', initParticles, { once: true });
+    }
+
+    // Handle Astro client navigation
+    document.addEventListener('astro:after-swap', () => {
+      // after content swapped into DOM
+      initParticles();
+    });
+    window.addEventListener('pageshow', (e) => {
+      if (e && e.persisted) {
+        // bfcache restored
+        initParticles();
+      }
+    });
+    window.addEventListener('pagehide', () => cleanup());
+
+    // Safety: re-init on visibility changes
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) initParticles();
+    });
   })();
 </script>
-

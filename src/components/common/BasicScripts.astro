@@ -29,6 +29,91 @@ import { UI } from 'astrowind:config';
       applyTheme('light');
     }
   };
+  // Initialize widgets that need JS after swaps (e.g., HeroCarousel)
+  const initHeroCarousels = function () {
+    const setup = (root) => {
+      if (!root || root.dataset.inited === 'true') return;
+      root.dataset.inited = 'true';
+
+      const slides = Array.from(root.querySelectorAll('[data-aw-hero-slide]'));
+      const prev = root.querySelector('[data-aw-hero-prev]');
+      const next = root.querySelector('[data-aw-hero-next]');
+      const dots = Array.from(root.querySelectorAll('[data-aw-hero-dot]'));
+      if (!slides.length) return;
+
+      let current = 0;
+      let timer = null;
+      const autoPlay = root.dataset.autoplay === 'true';
+      const interval = parseInt(root.dataset.interval || '6000', 10);
+
+      const applyState = () => {
+        slides.forEach((el, i) => {
+          const active = i === current;
+          el.style.opacity = active ? '1' : '0';
+          el.style.pointerEvents = active ? 'auto' : 'none';
+        });
+        dots.forEach((dot, i) => {
+          dot.style.opacity = i === current ? '1' : '0.6';
+          dot.style.transform = i === current ? 'scale(1.1)' : 'scale(1)';
+          dot.classList.toggle('bg-white', i === current);
+        });
+      };
+
+      const goTo = (idx) => {
+        current = (idx + slides.length) % slides.length;
+        applyState();
+      };
+      const nextSlide = () => goTo(current + 1);
+      const prevSlide = () => goTo(current - 1);
+
+      next?.addEventListener('click', nextSlide);
+      prev?.addEventListener('click', prevSlide);
+      dots.forEach((dot) => dot.addEventListener('click', () => goTo(parseInt(dot.dataset.index || '0', 10))));
+
+      root.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight') nextSlide();
+        if (e.key === 'ArrowLeft') prevSlide();
+      });
+      root.setAttribute('tabindex', '0');
+
+      const start = () => {
+        if (!autoPlay) return;
+        clearInterval(timer);
+        timer = setInterval(nextSlide, interval);
+      };
+      const stop = () => clearInterval(timer);
+      root.addEventListener('mouseenter', stop);
+      root.addEventListener('mouseleave', start);
+      root.addEventListener('focusin', stop);
+      root.addEventListener('focusout', start);
+
+      const onVis = () => (document.hidden ? stop() : start());
+      const onPageHide = () => stop();
+      const onPageShow = (e) => {
+        applyState();
+        if (e && e.persisted) start();
+      };
+      document.addEventListener('visibilitychange', onVis);
+      window.addEventListener('pagehide', onPageHide);
+      window.addEventListener('pageshow', onPageShow);
+
+      applyState();
+      start();
+
+      const observer = new MutationObserver(() => {
+        if (!document.body.contains(root)) {
+          clearInterval(timer);
+          document.removeEventListener('visibilitychange', onVis);
+          window.removeEventListener('pagehide', onPageHide);
+          window.removeEventListener('pageshow', onPageShow);
+          observer.disconnect();
+        }
+      });
+      observer.observe(document.body, { childList: true, subtree: true });
+    };
+
+    document.querySelectorAll('[data-aw-hero-carousel]')?.forEach(setup);
+  };
   initTheme();
 
   function attachEvent(selector, event, fn) {
@@ -156,11 +241,13 @@ import { UI } from 'astrowind:config';
 
   window.onload = onLoad;
   window.onpageshow = onPageShow;
+  window.addEventListener('load', () => initHeroCarousels());
 
   document.addEventListener('astro:after-swap', () => {
     initTheme();
     onLoad();
     onPageShow();
+    initHeroCarousels();
   });
 </script>
 

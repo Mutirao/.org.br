@@ -1,0 +1,280 @@
+---
+import Image from '~/components/common/Image.astro';
+import Button from '~/components/ui/Button.astro';
+
+export interface SlideAction {
+  variant?: 'primary' | 'secondary' | 'tertiary' | 'link';
+  text?: string;
+  href?: string;
+  [key: string]: any;
+}
+
+export interface SlideItem {
+  title?: string;
+  subtitle?: string;
+  tagline?: string;
+  image?: { src: string; alt?: string } | string;
+  actions?: SlideAction[] | string;
+  overlay?: string; // Tailwind classes for an optional overlay
+}
+
+export interface Props {
+  id?: string;
+  slides?: SlideItem[];
+  autoPlay?: boolean;
+  interval?: number; // ms
+  bg?: string;
+}
+
+const {
+  id,
+  slides = [],
+  autoPlay = true,
+  interval = 6000,
+  bg = await Astro.slots.render('bg'),
+} = Astro.props as Props;
+
+const safeSlides = Array.isArray(slides) ? slides : [];
+---
+
+<section class="relative md:-mt-[76px] not-prose" {...id ? { id } : {}}>
+  <div class="absolute inset-0 pointer-events-none" aria-hidden="true">
+    <slot name="bg">{bg ? <Fragment set:html={bg} /> : null}</slot>
+  </div>
+
+  <div class="relative max-w-7xl mx-auto px-4 sm:px-6">
+    <div class="pt-0 md:pt-[76px] pointer-events-none"></div>
+    <div class="py-12 md:py-20">
+      <div
+        class="relative rounded-md overflow-hidden bg-black/5 dark:bg-white/5"
+        data-aw-hero-carousel
+        {...{ 'data-interval': interval, 'data-autoplay': autoPlay ? 'true' : 'false' }}
+        aria-roledescription="carousel"
+      >
+        {
+          safeSlides.length === 0 ? (
+            <div class="aspect-[16/9] flex items-center justify-center text-muted">
+              Sem slides configurados.
+            </div>
+          ) : (
+            <Fragment>
+              {/* Slides */}
+              {safeSlides.map((slide, idx) => (
+                <div
+                  class={`absolute inset-0 z-0 transition-opacity duration-700 ease-in-out ${idx === 0 ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+                  role="group"
+                  aria-roledescription="slide"
+                  aria-label={`Slide ${idx + 1} de ${safeSlides.length}`}
+                  data-aw-hero-slide
+                  data-index={idx}
+                >
+                  {/* Background Image */}
+                  {
+                    slide?.image ? (
+                      typeof slide.image === 'string' ? (
+                        <img
+                          src={slide.image}
+                          alt={slide?.title || 'Slide'}
+                          class="absolute inset-0 w-full h-full object-cover pointer-events-none"
+                          loading="eager"
+                          decoding="async"
+                        />
+                      ) : (
+                        <Image
+                          class="absolute inset-0 w-full h-full object-cover pointer-events-none"
+                          widths={[640, 1024, 1440, 1920]}
+                          sizes="(max-width: 640px) 640px, (max-width: 1024px) 1024px, (max-width: 1440px) 1440px, 1920px"
+                          loading="eager"
+                          width={1920}
+                          height={1080}
+                          {...slide.image}
+                        />
+                      )
+                    ) : (
+                      <div class="absolute inset-0 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-slate-800 dark:to-slate-900" />
+                    )
+                  }
+
+                  {/* Optional overlay per slide */}
+                  {slide?.overlay && <div class={`absolute inset-0 ${slide.overlay} pointer-events-none`} />}
+
+                  {/* Content */}
+                  <div class="relative z-10 flex items-center justify-center md:justify-start">
+                    <div class="w-full">
+                      <div class="px-4 sm:px-8 py-16 md:py-24 lg:py-32">
+                        <div class="max-w-3xl mx-auto md:mx-0 text-center md:text-left text-white">
+                          {slide?.tagline && (
+                            <p
+                              class="text-base text-blue-100 font-bold tracking-wide uppercase intersect-once intersect-quarter motion-safe:md:opacity-0 motion-safe:md:intersect:animate-fade"
+                              set:html={slide.tagline}
+                            />
+                          )}
+                          {slide?.title && (
+                            <h1
+                              class="text-4xl md:text-6xl font-bold leading-tighter tracking-tighter mb-4 font-heading intersect-once intersect-quarter motion-safe:md:opacity-0 motion-safe:md:intersect:animate-fade"
+                              set:html={slide.title}
+                            />
+                          )}
+                          {slide?.subtitle && (
+                            <p
+                              class="text-lg md:text-xl text-white/90 mb-6 intersect-once intersect-quarter motion-safe:md:opacity-0 motion-safe:md:intersect:animate-fade"
+                              set:html={slide.subtitle}
+                            />
+                          )}
+                          {slide?.actions && (
+                            <div class="max-w-xs sm:max-w-md m-auto md:m-0 flex flex-nowrap flex-col sm:flex-row sm:justify-start gap-4 intersect-once intersect-quarter motion-safe:md:opacity-0 motion-safe:md:intersect:animate-fade">
+                              {Array.isArray(slide.actions) ? (
+                                slide.actions.map((action) => (
+                                  <div class="flex w-full sm:w-auto">
+                                    <Button {...(action || {})} class="w-full sm:mb-0" />
+                                  </div>
+                                ))
+                              ) : (
+                                <Fragment set:html={slide.actions} />
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              {/* Natural aspect ratio space holder */}
+              <div class="aspect-[16/9] md:aspect-[21/9]" aria-hidden="true"></div>
+
+              {/* Controls */}
+              <button
+                type="button"
+                class="absolute z-30 left-2 top-1/2 -translate-y-1/2 inline-flex h-10 w-10 items-center justify-center rounded-full bg-black/40 text-white hover:bg-black/60 focus:outline-none focus:ring-2 focus:ring-white"
+                aria-label="Slide anterior"
+                data-aw-hero-prev
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-5 w-5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+
+              <button
+                type="button"
+                class="absolute z-30 right-2 top-1/2 -translate-y-1/2 inline-flex h-10 w-10 items-center justify-center rounded-full bg-black/40 text-white hover:bg-black/60 focus:outline-none focus:ring-2 focus:ring-white"
+                aria-label="Próximo slide"
+                data-aw-hero-next
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-5 w-5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+
+              {/* Dots */}
+              <div class="absolute z-20 bottom-4 left-0 right-0 flex items-center justify-center gap-2">
+                {safeSlides.map((_, idx) => (
+                  <button
+                    type="button"
+                    class="h-2.5 w-2.5 rounded-full bg-white/50 hover:bg-white/80 focus:outline-none focus:ring-2 focus:ring-white"
+                    aria-label={`Ir para o slide ${idx + 1}`}
+                    data-aw-hero-dot
+                    data-index={idx}
+                  ></button>
+                ))}
+              </div>
+            </Fragment>
+          )
+        }
+      </div>
+    </div>
+  </div>
+</section>
+
+<script is:inline>
+  const setupCarousel = (root) => {
+    if (root.dataset.inited === 'true') return; // idempotente
+    root.dataset.inited = 'true';
+    const slides = Array.from(root.querySelectorAll('[data-aw-hero-slide]'));
+    const prev = root.querySelector('[data-aw-hero-prev]');
+    const next = root.querySelector('[data-aw-hero-next]');
+    const dots = Array.from(root.querySelectorAll('[data-aw-hero-dot]'));
+
+    if (!slides.length) return;
+
+    let current = 0;
+    let timer = null;
+    const autoPlay = root.dataset.autoplay === 'true';
+    const interval = parseInt(root.dataset.interval || '6000', 10);
+
+    const applyState = () => {
+      slides.forEach((el, i) => {
+        const active = i === current;
+        el.style.opacity = active ? '1' : '0';
+        el.style.pointerEvents = active ? 'auto' : 'none';
+      });
+      dots.forEach((dot, i) => {
+        dot.style.opacity = i === current ? '1' : '0.6';
+        dot.style.transform = i === current ? 'scale(1.1)' : 'scale(1)';
+        dot.classList.toggle('bg-white', i === current);
+      });
+    };
+
+    const goTo = (idx) => {
+      current = (idx + slides.length) % slides.length;
+      applyState();
+    };
+
+    const nextSlide = () => goTo(current + 1);
+    const prevSlide = () => goTo(current - 1);
+
+    // Bindings
+    next?.addEventListener('click', nextSlide);
+    prev?.addEventListener('click', prevSlide);
+    dots.forEach((dot) => dot.addEventListener('click', () => goTo(parseInt(dot.dataset.index || '0', 10))));
+
+    // Keyboard
+    root.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') nextSlide();
+      if (e.key === 'ArrowLeft') prevSlide();
+    });
+    root.setAttribute('tabindex', '0');
+
+    // Autoplay with pause on hover/focus
+    const start = () => {
+      if (!autoPlay) return;
+      clearInterval(timer);
+      timer = setInterval(nextSlide, interval);
+    };
+    const stop = () => clearInterval(timer);
+    root.addEventListener('mouseenter', stop);
+    root.addEventListener('mouseleave', start);
+    root.addEventListener('focusin', stop);
+    root.addEventListener('focusout', start);
+
+    // Init
+    applyState();
+    start();
+
+    // Page lifecycle: pause/resume on visibility and bfcache
+    const onVis = () => (document.hidden ? stop() : start());
+    const onPageHide = () => stop();
+    const onPageShow = (e) => {
+      applyState();
+      if (e && e.persisted) start();
+    };
+    document.addEventListener('visibilitychange', onVis);
+    window.addEventListener('pagehide', onPageHide);
+    window.addEventListener('pageshow', onPageShow);
+
+    // Cleanup when removed
+    const observer = new MutationObserver(() => {
+      if (!document.body.contains(root)) {
+        clearInterval(timer);
+        document.removeEventListener('visibilitychange', onVis);
+        window.removeEventListener('pagehide', onPageHide);
+        window.removeEventListener('pageshow', onPageShow);
+        observer.disconnect();
+      }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+  };
+
+  document.querySelectorAll('[data-aw-hero-carousel]').forEach(setupCarousel);
+</script>

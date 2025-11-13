@@ -1,6 +1,7 @@
 ---
 import Layout from '~/layouts/PageLayout.astro';
 import Hero from '~/components/widgets/Hero.astro';
+import HeroCarousel from '~/components/widgets/HeroCarousel.astro';
 import Features from '~/components/widgets/Features.astro';
 import Content from '~/components/widgets/Content.astro';
 import Stats from '~/components/widgets/Stats.astro';
@@ -26,29 +27,54 @@ const metadata = {
     - Cores quentes, iluminação natural, ambiente acolhedor
   -->
 
-  <Hero
-    actions={[
+  <HeroCarousel
+    slides={[
       {
-        variant: 'primary',
-        text: 'Conheça nossos projetos',
-        href: '/projetos',
+        title: `Quando fazemos juntos,<br /><span class='text-accent dark:text-white'>fazemos melhor</span>`,
+        subtitle:
+          "Conectamos tecnologia, cultura e educação para fortalecer comunidades, ampliar direitos e tecer redes de transformação social.",
+        image: {
+          src: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?q=80&w=1920&auto=format&fit=crop',
+          alt: 'Pessoas colaborando em roda',
+        },
+        actions: [
+          { variant: 'primary', text: 'Conheça nossos projetos', href: '/projetos' },
+          { variant: 'secondary', text: 'Sobre o Instituto', href: '/about' },
+        ],
+        overlay: 'bg-gradient-to-b from-black/40 via-black/30 to-black/50',
       },
-      { text: 'Sobre o Instituto', href: '/about' },
+      {
+        title: `Tecnologia pública e aberta`,
+        subtitle:
+          'Desenvolvemos e apoiamos plataformas digitais públicas, como a Rede Mapas Culturais, para democratizar o acesso à cultura.',
+        image: {
+          src: 'https://images.unsplash.com/photo-1556761175-4b46a572b786?q=80&w=1920&auto=format&fit=crop',
+          alt: 'Tecnologia em espaços públicos',
+        },
+        actions: [
+          { variant: 'primary', text: 'Ver frentes de atuação', href: '/frentes' },
+        ],
+        overlay: 'bg-black/45',
+      },
+      {
+        title: `Cultura popular, redes e formação`,
+        subtitle:
+          'Valorizamos mestres e saberes tradicionais, promovemos encontros e formações para fortalecer territórios e comunidades.',
+        image: {
+          src: 'https://images.unsplash.com/photo-1508205069488-d789d1f16383?q=80&w=1920&auto=format&fit=crop',
+          alt: 'Cultura popular em movimento',
+        },
+        actions: [
+          { variant: 'primary', text: 'Fale com a gente', href: '/contato' },
+        ],
+        overlay: 'bg-gradient-to-t from-black/50 to-black/20',
+      },
     ]}
   >
     <Fragment slot="bg">
       <ParticlesBackground />
     </Fragment>
-    <Fragment slot="title">
-      Quando fazemos juntos,<br />
-      <span class="text-accent dark:text-white">fazemos melhor</span>
-    </Fragment>
-
-    <Fragment slot="subtitle">
-      <span class="font-semibold">Mutirão</span> — Conectamos tecnologia, cultura e educação para fortalecer
-      comunidades, ampliar direitos e tecer redes de transformação social.
-    </Fragment>
-  </Hero>
+  </HeroCarousel>
 
   <!-- Stats Widget ****************** -->
   <!--
