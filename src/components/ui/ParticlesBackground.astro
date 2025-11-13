@@ -1,0 +1,38 @@
+---
+---
+
+<div id="particles-js" class="w-full h-full pointer-events-none"></div>
+
+<!-- Load particles.js from CDN and initialize -->
+<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js" is:inline></script>
+<script is:inline>
+  (function initParticles() {
+    function start() {
+      if (typeof window === 'undefined' || typeof particlesJS === 'undefined') return;
+      particlesJS('particles-js', {
+        particles: {
+          number: { value: 60, density: { enable: true, value_area: 800 } },
+          color: { value: ['#FF6B35', '#00A8E8', '#7E57C2'] },
+          shape: { type: 'circle' },
+          opacity: { value: 0.5, random: false },
+          size: { value: 3, random: true },
+          line_linked: { enable: true, distance: 150, color: '#9CA3AF', opacity: 0.35, width: 1 },
+          move: { enable: true, speed: 1.2, direction: 'none', random: false, straight: false, out_mode: 'out' }
+        },
+        interactivity: {
+          detect_on: 'canvas',
+          events: { onhover: { enable: false }, onclick: { enable: false }, resize: true },
+          modes: {}
+        },
+        retina_detect: true
+      });
+    }
+
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      start();
+    } else {
+      document.addEventListener('DOMContentLoaded', start, { once: true });
+    }
+  })();
+</script>
+

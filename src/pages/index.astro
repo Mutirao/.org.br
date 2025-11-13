@@ -7,6 +7,7 @@ import Stats from '~/components/widgets/Stats.astro';
 import CallToAction from '~/components/widgets/CallToAction.astro';
 import Steps from '~/components/widgets/Steps.astro';
 import NetworkPattern from '~/components/ui/NetworkPattern.astro';
+import ParticlesBackground from '~/components/ui/ParticlesBackground.astro';
 
 const metadata = {
   title: 'Instituto Brasileiro de Políticas Digitais – Mutirão',
@@ -35,6 +36,9 @@ const metadata = {
       { text: 'Sobre o Instituto', href: '/about' },
     ]}
   >
+    <Fragment slot="bg">
+      <ParticlesBackground />
+    </Fragment>
     <Fragment slot="title">
       Quando fazemos juntos,<br />
       <span class="text-accent dark:text-white">fazemos melhor</span>
