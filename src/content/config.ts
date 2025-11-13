@@ -46,6 +46,9 @@ const metadataDefinition = () =>
     })
     .optional();
 
+/**
+ * Blog posts (já existia no AstroWind)
+ */
 const postCollection = defineCollection({
   loader: glob({ pattern: ['*.md', '*.mdx'], base: 'src/data/post' }),
   schema: z.object({
@@ -65,6 +68,53 @@ const postCollection = defineCollection({
   }),
 });
 
+/**
+ * Páginas institucionais (Home, Sobre, Frentes, Projetos, Governança, Contato, etc.)
+ */
+const pageCollection = defineCollection({
+  loader: glob({ pattern: ['*.md'], base: 'src/data/page' }),
+  schema: z.object({
+    title: z.string(),
+    description: z.string().optional(),
+    layout: z.string().optional(), // se quiser usar um layout específico
+    metadata: metadataDefinition(),
+  }),
+});
+
+/**
+ * Projetos do portfólio institucional
+ */
+const projectCollection = defineCollection({
+  loader: glob({ pattern: ['*.md'], base: 'src/data/project' }),
+  schema: z.object({
+    title: z.string(),
+    subtitle: z.string().optional(),
+    year: z.number(),
+    location: z.string().optional(),
+    partners: z.array(z.string()).optional(),
+    tags: z.array(z.string()).optional(),
+    featured: z.boolean().optional(),
+    metadata: metadataDefinition(),
+  }),
+});
+
+/**
+ * Equipe (diretoria, conselheiros, etc.)
+ */
+const teamCollection = defineCollection({
+  loader: glob({ pattern: ['*.md'], base: 'src/data/team' }),
+  schema: z.object({
+    name: z.string(),
+    role: z.string(),
+    bio: z.string().optional(),
+    order: z.number().optional(),
+    metadata: metadataDefinition(),
+  }),
+});
+
 export const collections = {
   post: postCollection,
+  page: pageCollection,
+  project: projectCollection,
+  team: teamCollection,
 };

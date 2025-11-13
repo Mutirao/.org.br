@@ -1,0 +1,71 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '~/layouts/PageLayout.astro';
+
+const projects = await getCollection('project');
+
+// Ordenar projetos por ano (mais recente primeiro)
+const sortedProjects = projects.sort((a, b) => b.data.year - a.data.year);
+
+// Agrupar projetos por ano
+const projectsByYear = sortedProjects.reduce((acc, project) => {
+  const year = project.data.year;
+  if (!acc[year]) {
+    acc[year] = [];
+  }
+  acc[year].push(project);
+  return acc;
+}, {} as Record<number, typeof projects>);
+
+const metadata = {
+  title: 'Projetos',
+  description: 'Portfólio de projetos do Instituto Mutirão desde 2013.',
+};
+---
+
+<Layout metadata={metadata}>
+  <section class="px-4 py-16 sm:px-6 mx-auto lg:px-8 lg:py-20 max-w-6xl">
+    <header class="mb-12">
+      <h1 class="text-4xl md:text-5xl font-bold leading-tighter tracking-tighter mb-4 font-heading dark:text-gray-200">
+        Projetos
+      </h1>
+      <p class="text-xl text-muted dark:text-slate-400">
+        Desde 2013, o Mutirão participa da concepção, articulação, desenvolvimento e execução de projetos que conectam
+        cultura, tecnologia, educação, mobilização social e políticas públicas.
+      </p>
+    </header>
+
+    {
+      Object.entries(projectsByYear).map(([year, yearProjects]) => (
+        <div class="mb-12">
+          <h2 class="text-3xl font-bold mb-6 text-primary dark:text-blue-400">{year}</h2>
+          <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {yearProjects.map((project) => (
+              <a
+                href={`/projeto/${project.id.replace('.md', '')}`}
+                class="block p-6 bg-white dark:bg-slate-800 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 border border-gray-200 dark:border-slate-700"
+              >
+                <h3 class="text-xl font-bold mb-2 text-gray-900 dark:text-gray-100">{project.data.title}</h3>
+                {project.data.subtitle && (
+                  <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">{project.data.subtitle}</p>
+                )}
+                {project.data.location && (
+                  <p class="text-sm text-gray-500 dark:text-gray-500 mb-2">📍 {project.data.location}</p>
+                )}
+                {project.data.tags && project.data.tags.length > 0 && (
+                  <div class="flex flex-wrap gap-2 mt-4">
+                    {project.data.tags.slice(0, 3).map((tag) => (
+                      <span class="text-xs px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </a>
+            ))}
+          </div>
+        </div>
+      ))
+    }
+  </section>
+</Layout>

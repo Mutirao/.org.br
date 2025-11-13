@@ -1,0 +1,114 @@
+---
+import { getCollection, render } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+import Layout from '~/layouts/PageLayout.astro';
+
+export const getStaticPaths = (async () => {
+  const projects = await getCollection('project');
+  return projects.map((project) => ({
+    params: { slug: project.id.replace('.md', '') },
+    props: { project },
+  }));
+}) satisfies GetStaticPaths;
+
+const { project } = Astro.props;
+const { Content } = await render(project);
+
+const metadata = {
+  title: project.data.title,
+  description: project.data.subtitle || project.data.title,
+  ...project.data.metadata,
+};
+---
+
+<Layout metadata={metadata}>
+  <section class="px-4 py-16 sm:px-6 mx-auto lg:px-8 lg:py-20 max-w-4xl">
+    <article>
+      <!-- Breadcrumb -->
+      <nav class="mb-8 text-sm">
+        <a href="/" class="text-primary hover:underline">Home</a>
+        <span class="mx-2 text-gray-500">/</span>
+        <a href="/projetos" class="text-primary hover:underline">Projetos</a>
+        <span class="mx-2 text-gray-500">/</span>
+        <span class="text-gray-600 dark:text-gray-400">{project.data.title}</span>
+      </nav>
+
+      <!-- Header -->
+      <header class="mb-8">
+        <h1
+          class="text-4xl md:text-5xl font-bold leading-tighter tracking-tighter mb-4 font-heading dark:text-gray-200"
+        >
+          {project.data.title}
+        </h1>
+        {
+          project.data.subtitle && (
+            <p class="text-xl text-gray-600 dark:text-slate-400 mb-4">{project.data.subtitle}</p>
+          )
+        }
+
+        <!-- Metadata -->
+        <div class="flex flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-400 mb-6">
+          <div class="flex items-center gap-2">
+            <span class="font-semibold">Ano:</span>
+            <span>{project.data.year}</span>
+          </div>
+          {
+            project.data.location && (
+              <div class="flex items-center gap-2">
+                <span class="font-semibold">Local:</span>
+                <span>{project.data.location}</span>
+              </div>
+            )
+          }
+        </div>
+
+        <!-- Tags -->
+        {
+          project.data.tags && project.data.tags.length > 0 && (
+            <div class="flex flex-wrap gap-2 mb-6">
+              {project.data.tags.map((tag) => (
+                <span class="text-sm px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )
+        }
+
+        <!-- Partners -->
+        {
+          project.data.partners && project.data.partners.length > 0 && (
+            <div class="mb-6">
+              <h3 class="font-semibold text-gray-900 dark:text-gray-100 mb-2">Parceiros:</h3>
+              <ul class="list-disc list-inside text-gray-700 dark:text-gray-300">
+                {project.data.partners.map((partner) => (
+                  <li>{partner}</li>
+                ))}
+              </ul>
+            </div>
+          )
+        }
+      </header>
+
+      <!-- Content -->
+      <div
+        class="prose prose-lg dark:prose-invert dark:prose-headings:text-slate-300 prose-md prose-headings:font-heading prose-headings:leading-tighter prose-headings:tracking-tighter prose-headings:font-bold prose-a:text-primary dark:prose-a:text-blue-400 prose-img:rounded-md prose-img:shadow-lg mt-8 prose-headings:scroll-mt-[80px] prose-li:my-0"
+      >
+        <Content />
+      </div>
+
+      <!-- Back to projects -->
+      <div class="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
+        <a
+          href="/projetos"
+          class="inline-flex items-center gap-2 text-primary hover:underline font-medium"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+          </svg>
+          Voltar para Projetos
+        </a>
+      </div>
+    </article>
+  </section>
+</Layout>

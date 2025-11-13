@@ -1,0 +1,139 @@
+---
+/**
+ * NetworkDivider - Decorative section divider
+ *
+ * A visual separator between sections that reinforces the network/connection theme.
+ * Features circular nodes connected by lines, representing collaboration and interconnection.
+ *
+ * Props:
+ * - variant: 'simple' or 'detailed' (default: 'simple')
+ * - color: Primary color for the divider (default: uses CSS variable --aw-color-primary)
+ */
+
+interface Props {
+  variant?: 'simple' | 'detailed';
+  color?: string;
+}
+
+const { variant = 'simple', color } = Astro.props;
+---
+
+<div class="network-divider" data-variant={variant}>
+  {variant === 'simple' ? (
+    <svg width="100" height="20" viewBox="0 0 100 20" xmlns="http://www.w3.org/2000/svg" class="network-divider__svg">
+      <!-- Central node -->
+      <circle cx="50" cy="10" r="4" class="network-divider__node network-divider__node--primary" />
+
+      <!-- Side nodes -->
+      <circle cx="20" cy="10" r="2.5" class="network-divider__node network-divider__node--secondary" />
+      <circle cx="80" cy="10" r="2.5" class="network-divider__node network-divider__node--secondary" />
+
+      <!-- Connections -->
+      <line x1="20" y1="10" x2="50" y2="10" class="network-divider__line" />
+      <line x1="50" y1="10" x2="80" y2="10" class="network-divider__line" />
+    </svg>
+  ) : (
+    <svg width="200" height="40" viewBox="0 0 200 40" xmlns="http://www.w3.org/2000/svg" class="network-divider__svg">
+      <!-- Central cluster -->
+      <circle cx="100" cy="20" r="5" class="network-divider__node network-divider__node--primary" />
+      <circle cx="85" cy="15" r="3" class="network-divider__node network-divider__node--secondary" />
+      <circle cx="115" cy="15" r="3" class="network-divider__node network-divider__node--secondary" />
+      <circle cx="90" cy="28" r="2.5" class="network-divider__node network-divider__node--tertiary" />
+      <circle cx="110" cy="28" r="2.5" class="network-divider__node network-divider__node--tertiary" />
+
+      <!-- Outer nodes -->
+      <circle cx="30" cy="20" r="3" class="network-divider__node network-divider__node--secondary" />
+      <circle cx="170" cy="20" r="3" class="network-divider__node network-divider__node--secondary" />
+
+      <!-- Connections -->
+      <line x1="30" y1="20" x2="85" y2="15" class="network-divider__line" />
+      <line x1="85" y1="15" x2="100" y2="20" class="network-divider__line" />
+      <line x1="100" y1="20" x2="115" y2="15" class="network-divider__line" />
+      <line x1="115" y1="15" x2="170" y2="20" class="network-divider__line" />
+      <line x1="90" y1="28" x2="100" y2="20" class="network-divider__line network-divider__line--subtle" />
+      <line x1="110" y1="28" x2="100" y2="20" class="network-divider__line network-divider__line--subtle" />
+    </svg>
+  )}
+</div>
+
+<style define:vars={{ dividerColor: color }}>
+  .network-divider {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 3rem auto;
+    max-width: fit-content;
+  }
+
+  .network-divider__svg {
+    display: block;
+  }
+
+  .network-divider__node {
+    transition: all 0.3s ease;
+  }
+
+  .network-divider__node--primary {
+    fill: var(--dividerColor, rgb(var(--aw-color-primary)));
+    filter: drop-shadow(0 0 4px rgba(255, 107, 53, 0.3));
+  }
+
+  .network-divider__node--secondary {
+    fill: var(--dividerColor, rgb(var(--aw-color-accent)));
+    opacity: 0.8;
+  }
+
+  .network-divider__node--tertiary {
+    fill: var(--dividerColor, rgb(var(--aw-color-highlight)));
+    opacity: 0.6;
+  }
+
+  .network-divider__line {
+    stroke: var(--dividerColor, rgb(var(--aw-color-primary)));
+    stroke-width: 1.5;
+    opacity: 0.4;
+  }
+
+  .network-divider__line--subtle {
+    opacity: 0.2;
+  }
+
+  /* Hover animation */
+  .network-divider:hover .network-divider__node {
+    transform: scale(1.2);
+  }
+
+  .network-divider:hover .network-divider__line {
+    opacity: 0.7;
+    stroke-width: 2;
+  }
+
+  /* Dark mode adjustments */
+  :global(.dark) .network-divider__node--primary {
+    fill: rgb(255 140 100);
+    filter: drop-shadow(0 0 6px rgba(255, 140, 100, 0.4));
+  }
+
+  :global(.dark) .network-divider__node--secondary {
+    fill: rgb(100 200 130);
+  }
+
+  :global(.dark) .network-divider__node--tertiary {
+    fill: rgb(255 215 120);
+  }
+
+  :global(.dark) .network-divider__line {
+    stroke: rgb(255 140 100);
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .network-divider {
+      margin: 2rem auto;
+    }
+
+    .network-divider__svg {
+      transform: scale(0.8);
+    }
+  }
+</style>

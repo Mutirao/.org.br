@@ -3,10 +3,9 @@ import { getCollection, render } from 'astro:content';
 import Layout from '~/layouts/PageLayout.astro';
 
 const pages = await getCollection('page');
-const page = pages.find((p) => p.id === 'about.md' || p.id === 'about');
+const page = pages.find((p) => p.id === 'frentes.md' || p.id === 'frentes');
 
 if (!page) {
-  console.log('Available page IDs:', pages.map(p => p.id));
   return Astro.redirect('/404');
 }
 
